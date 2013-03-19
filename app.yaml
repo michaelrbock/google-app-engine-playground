@@ -1,0 +1,33 @@
+application: mbockcs253
+version: 2a
+runtime: python27
+api_version: 1
+threadsafe: true
+
+libraries:
+- name: jinja2
+  version: latest
+
+handlers:
+- url: /favicon\.ico
+  static_files: favicon.ico
+  upload: favicon\.ico
+
+- url: /static/main\.css
+  static_files: main.css
+  upload: main\.css
+
+- url: /
+  script: main.app
+
+- url: /wiki/?.*
+  script: wiki.app
+
+- url: /blog/?.*
+  script: blog.app
+
+- url: /hashbackapi
+  script: hashbackapi.app
+
+- url: /ascii/?.*
+  script: ascii.app

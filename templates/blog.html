@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="/static/main.css"/>
+
+	<title>Michael's CS 253 Blog</title>
+</head>
+
+<body>
+	<a href="/blog" class="main-title">CS 253 Blog</a>
+
+	<div class="login-area">
+		<a class="login-link" href="/blog/login">login</a>
+		|
+		<a class="login-link" href="/blog/signup">signup</a>
+	</div>
+
+	<div id="content">
+
+		{% for post in posts %}
+		<div class="post">
+			<div class="post-heading">
+				<a href="/blog/{{post[1]}}" class="post-title">{{post[0].title}}</a>
+
+				<div class="post-date">{{post[0].created.date()}}</div>
+			</div>
+			<div class="post-content">{{post[0].content}}</div>
+		</div>
+		<br><br>
+		{% endfor %}
+
+	</div>
+
+</body>
+</html>
