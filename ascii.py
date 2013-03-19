@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-#
-# Unit ___
 
 import logging
 import webapp2
