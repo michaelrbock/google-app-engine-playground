@@ -138,7 +138,8 @@ class User(db.Model):
 
 class LoginHandler(BaseHandler):
 	def get(self):
-		self.render('login.html')
+		next_url = self.request.headers.get('referer', '/wiki')
+		self.render('login.html', next_url = next_url)
 
 	def post(self):
 		user_username = self.request.get('username')
@@ -151,12 +152,17 @@ class LoginHandler(BaseHandler):
 			users.append(user.username)
 			passwords.append(user.password)
 
+		#redirect stuff
+		next_url = str(self.request.get('next_url'))
+		if not next_url or next_url.startswith('/wiki/login'):
+			next_url = '/wiki'
+
 		if user_username in users:
 			if hash_str(user_password)==passwords[users.index(user_username)]:
 				new_cookie_val = make_secure_val(user_username)
 				str_new_cookie_val = str(new_cookie_val)
 				self.response.headers.add_header('Set-Cookie', 'user='+str_new_cookie_val+'; Path=/')
-				self.redirect('/wiki')
+				self.redirect(next_url)
 				return
 
 		#else
@@ -166,18 +172,25 @@ class LoginHandler(BaseHandler):
 
 class LogoutHandler(BaseHandler):
 	def get(self):
+		next_url = self.request.headers.get('referer', '/wiki')
 		self.response.headers.add_header('Set-Cookie', 'user=;Path=/')
-		self.redirect('/wiki')
+		self.redirect(next_url)
 
 class SignupHandler(BaseHandler):
 	def get(self):
-		self.render('signup.html')
+		next_url = self.request.headers.get('referer', '/')
+		self.render('signup.html', next_url = next_url)
 
 	def post(self):
 		user_username = self.request.get('username')
 		user_password = self.request.get('password')
 		user_verify   = self.request.get('verify')
 		user_email    = self.request.get('email')
+
+		#redirect stuff
+		next_url = str(self.request.get('next_url'))
+		if not next_url or next_url.startswith('/wiki/login'):
+			next_url = '/wiki'
 
 		is_username_valid = valid_username(user_username)
 		is_password_valid = valid_password(user_password)
@@ -209,7 +222,7 @@ class SignupHandler(BaseHandler):
 				new_cookie_val = make_secure_val(user_username)
 				str_new_cookie_val = str(new_cookie_val)
 				self.response.headers.add_header('Set-Cookie', 'user='+str_new_cookie_val+'; Path=/')
-				self.redirect("/wiki")
+				self.redirect(next_url)
 
 		else:
 			params = {'username': user_username,
