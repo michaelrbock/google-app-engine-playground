@@ -26,8 +26,5 @@ handlers:
 - url: /blog/?.*
   script: blog.app
 
-- url: /hashbackapi
-  script: hashbackapi.app
-
 - url: /ascii/?.*
   script: ascii.app
