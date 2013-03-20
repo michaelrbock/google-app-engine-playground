@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="/static/main.css"/>
+
+	<title>Wiki {{title}}</title>
+</head>
+
+<body>
+	<a href="/wiki/{{title[1:]}}" class="main-title">Wiki {{title}}</a>
+
+	<div class="login-area"> 
+		{% if not user %}
+		<a class="login-link" href="/wiki/login">login</a>
+		|
+		<a class="login-link" href="/wiki/signup">signup</a>
+		{% endif %}
+
+		{% if user %}
+		{{user}} <a class="login-link" href="/wiki/logout">(logout)<a>
+		{% endif %}
+	</div>
+
+	<form method="post">
+
+		<label>
+			<div>{{title}}</div>
+			<textarea name="content">{{content}}</textarea>
+		</label>
+
+		<input type="submit">
+	</form>
+</body>
+
+</html>

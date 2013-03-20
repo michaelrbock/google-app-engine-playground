@@ -16,7 +16,7 @@ from datetime import datetime, time
 from google.appengine.api import memcache
 from google.appengine.ext import db
 
-SECRET = '' #redacted for security
+SECRET = 'wd57ss50AEcbO0PdMVpU'
 
 jinja_environment = jinja2.Environment(autoescape=True,
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')))
@@ -111,7 +111,7 @@ def front_page(update=False):
 	time_key = 'time'
 	posts = memcache.get(posts_key)
 	if posts is None or update:
-		logging.error("DB QUERY")
+		logging.info("DB QUERY")
 		posts = db.GqlQuery("SELECT * FROM Post ORDER BY created DESC LIMIT 0, 10")
 		posts = list(posts)
 		time = datetime.now()
