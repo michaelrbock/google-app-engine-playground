@@ -75,7 +75,7 @@ class EditPageHandler(BaseHandler):
 				self.redirect('/wiki/'+title[1:])
 				return
 			else:
-				self.redirect('/wiki')
+				self.redirect('/wiki/login')
 				return
 		elif self.request.cookies.get('user'):
 			if not check_secure_val(self.request.cookies.get('user')):
@@ -83,7 +83,7 @@ class EditPageHandler(BaseHandler):
 					self.redirect('/wiki/'+title[1:])
 					return
 				else:
-					self.redirect('/wiki')
+					self.redirect('/wiki/logout')
 					return
 			else:
 				params['user'] = check_secure_val(self.request.cookies.get('user'))
@@ -128,12 +128,7 @@ class WikiPageHandler(BaseHandler):
 					params['user'] = check_secure_val(self.request.cookies.get('user'))
 			self.render('base_wiki.html', **params)
 		else:
-			if self.request.cookies.get('user'):
-				if check_secure_val(self.request.cookies.get('user')):
-					params['user'] = check_secure_val(self.request.cookies.get('user'))
-					self.redirect('/wiki/_edit/'+title[1:])
-			else:
-				self.render('base_wiki.html', **params)
+			self.redirect('/wiki/_edit/'+title[1:])
 
 class User(db.Model):
 	username = db.StringProperty(required = True)
