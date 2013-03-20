@@ -16,7 +16,7 @@ from datetime import datetime, time
 from google.appengine.api import memcache
 from google.appengine.ext import db
 
-SECRET = 'wd57ss50AEcbO0PdMVpU'
+SECRET = '' #redacted for security
 
 jinja_environment = jinja2.Environment(autoescape=True,
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')))
