@@ -47,7 +47,7 @@ class WikiPage(db.Model):
 	title = db.StringProperty(required = True)
 	content = db.TextProperty(required = True)
 	created = db.DateTimeProperty(auto_now_add = True)
-	last_modified = db.DateTimeProperty(auto_now = True)
+	# last_modified = db.DateTimeProperty(auto_now = True)
 
 def get_title(page):
 	if page=='':
@@ -61,6 +61,7 @@ class EditPageHandler(BaseHandler):
 		#check if page in db
 		q = db.Query(WikiPage)
 		q.filter('title =', title)
+		q.order('-created')
 		wiki_page = q.get()
 
 		params = {}
@@ -100,8 +101,8 @@ class EditPageHandler(BaseHandler):
 
 		if content:
 			#delete old if exists
-			if wiki_page:
-				wiki_page.delete()
+			# if wiki_page:
+				# wiki_page.delete()
 
 			w = WikiPage(title=title, content=content)
 			w.put()
@@ -113,10 +114,30 @@ class WikiPageHandler(BaseHandler):
 	def get(self, page=''):
 		title = get_title(page)
 
+		version = self.request.get('v')
+
 		#check if page in db
 		q = db.Query(WikiPage)
 		q.filter('title =', title)
-		wiki_page = q.get()
+		q.order('-created')
+
+		if not version or not version.isdigit():
+			wiki_page = q.get()
+		else:
+			posts = []
+			for p in q.run():
+				posts.append(p)
+			#get correct version
+			i = len(posts)-1
+			for p in posts:
+				if i == int(version):
+					wiki_page = p
+					break
+				i -= 1	
+			if i == -1:
+				wiki_page=None
+				self.redirect('/wiki/')
+				return
 
 		params = {}
 		params['title'] = title
@@ -127,8 +148,48 @@ class WikiPageHandler(BaseHandler):
 				if check_secure_val(self.request.cookies.get('user')):
 					params['user'] = check_secure_val(self.request.cookies.get('user'))
 			self.render('base_wiki.html', **params)
-		else:
-			self.redirect('/wiki/_edit/'+title[1:])
+		# else:
+			# self.redirect('/wiki/_edit/'+title[1:])
+
+class HistoryHandler(BaseHandler):
+	def get(self, page=''):
+		title = get_title(page)
+
+		#db query for last ten versions
+		q = db.Query(WikiPage)
+		q.filter('title =', title)
+		q.order('-created')
+
+		posts = []
+		for p in q.run():
+			posts.append(p)
+
+		i = len(posts)-1
+		for p in posts:
+			p.version = i
+			i -= 1
+
+		#if posts is empty, redirect to home
+		if len(posts)==0:
+			self.redirect('/wiki/')
+			return
+
+		params = {}
+		params['title'] = title
+		params['posts'] = posts
+
+		#check if user is signed in, else redirect
+		if not self.request.cookies.get('user'):
+			self.redirect('/wiki/login')
+			return
+		elif self.request.cookies.get('user'):
+			if not check_secure_val(self.request.cookies.get('user')):
+				self.redirect('/wiki/logout')
+				return
+			else:
+				params['user'] = check_secure_val(self.request.cookies.get('user'))
+				self.render('history.html', **params)
+
 
 class User(db.Model):
 	username = db.StringProperty(required = True)
@@ -258,6 +319,7 @@ routes = [('/wiki/signup', SignupHandler),
           ('/wiki/login', LoginHandler),
           ('/wiki/logout', LogoutHandler),
           ('/wiki/_edit'+PAGE_RE, EditPageHandler),
+          ('/wiki/_history'+PAGE_RE, HistoryHandler),
           ('/wiki'+PAGE_RE, WikiPageHandler),
           ('/wiki/?', WikiPageHandler)]
 app = webapp2.WSGIApplication(routes=routes, debug=True)
